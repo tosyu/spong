@@ -1,5 +1,14 @@
 /*jslint regexp: false, unparam: true, forin: true, nomen: true, maxerr: 50, indent: 4 */
-(function () {
+/*global ts: true */
+if (typeof ts === 'undefined') {
+	var ts = {
+		'core': {}
+	};
+} else if (typeof ts.core === 'undefined') {
+	ts.core = {};
+}
+
+(function (ts) {
 	"use strict";
 	Function.prototype.inherits = function inherits(Parent) {
 		var d = {}, p = (this.prototype = new Parent());
@@ -39,22 +48,21 @@
 	Function.prototype.extend = function extend(object) {
 		var i;
 		for (i in object) {
-			this.prototype[i] = object[i];	
+			this.prototype[i] = object[i];
 		}
 	};
 
 
-	function Class(value) {
+	ts.core.Class = function Class(value) {
 		this.init(arguments);
-	}
+	};
 
-	Class.prototype = {
-		'init': function BaseClass_init(initargs) {
+	ts.core.Class.prototype = {
+		'init': function ts_core_Class_init(initargs) {
 			this.__CLASS__ = initargs.callee.toString().match(/function\s?([a-zA-Z\-_]*)\s?\(/im)[1];
-		},	
-		'toString': function BaseClass_toString() {
+		},
+		'toString': function ts_core_Class__toString() {
 			return this.__CLASS__; // @TODO
 		}
 	};
-}());
-
+}(ts));
