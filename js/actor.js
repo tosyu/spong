@@ -7,18 +7,26 @@ Actor.extend({
 	'width': 0,
 	'height': 0,
 	'collidable': false,
-	'texture': undefined,
-	'_draw': function Actor__draw(context, currentTime) {
-		if (typeof this.texture != 'undefined') {
-			this.draw(context, currentTime);
-			if (typeof this['animate'] !== 'undefined') {
-				this.animate(context, currentTime);
-			}
+	'drawable': false,
+	'animated': true,
+	'_draw': function Actor__draw(context) {
+		if (this.drawable === true) {
+			this.draw(context);
 		}
 	},
 
 	'ready': function Actor_ready() {},
-	'draw': function Actor_draw(context, currentTime) {},
-	'animate': function Actor_animate(context, currentTime) {}
+	'draw': function Actor_draw(context) {},
+	'animate': function Actor_animate(currentTime) {},
+	'collisionDetect': function Actor_collisionDetect() {},
+	'_tick': function Actor__tick(currentTime) {
+		if (this.animated === true) {
+			this.animate(currentTime);
+		}
+
+		if (this.collidable === true) {
+			this.collisionDetect();
+		}
+	}
 
 });

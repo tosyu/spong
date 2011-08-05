@@ -6,18 +6,19 @@ Square.extend({
 	'y': 0,
 	'width': 10,
 	'height': 10,
-	'texture': false,
+	'drawable': true,
 
 	'ready': function Square_ready() {
 		this.log(this.id, 'ready!');
-		this.viewport.register(this.viewport.consts.LAYER_MIDGROUND, this.id, this);	
+		this.scene.register(this.scene.consts.LAYER_MIDGROUND, this.id, this);
 	},
 
-	'draw': function Square_draw(context, currentTime) {		
+	'draw': function Square_draw(context) {
 		context.fillStyle = this.viewport.getColor(255,255,255);
-		context.fillRect(this.x, this.y, this.width, this.height);		
+		context.fillRect(this.x, this.y, this.width, this.height);
 	},
-	'animate': function Square_animate(context, currentTime) {
+
+	'animate': function Square_animate(currentTime) {
 		this.x++;
 		this.y++;
 	}

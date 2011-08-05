@@ -1,21 +1,20 @@
 function Viewport() { this.init(arguments); this.run(); }
 Viewport.inherits(ts.core.Class);
 Viewport.extend({
-	'consts': {
-		'LAYER_BACKGROUND_FAR': 'LAYER_BACKGROUND_FAR',
-		'LAYER_BACKGROUND': 'LAYER_BACKGROUND',
-		'LAYER_MIDGROUND': 'LAYER_MIDGROUND',
-		'LAYER_FOREGROUND': 'LAYER_FOREGROUND',
-		'LAYER_FOREGROUND_CLOSE': 'LAYER_FOREGROUND_CLOSE'
-	},
 
 	'run': function Viewport_run() {
 		this.log('screen size is ', this.width, 'x', this.height);
 		this.buffer = 0;
-		this.drawers = {};
+		this.scenes = {};
+		this.currentScene = undefined;
 
 		this.canvasElements = [];
 		this.contexts = [];
+
+		var viewport = document.createElement('div');
+		viewport.setAttribute('id', 'viewport');
+		viewport.setAttribute('style', ['position:relative;padding:0;margin:0;width:', this.width, 'px;height:', this.height, 'px;'].join(''));
+		document.body.appendChild(viewport);
 
 		var i, maxCanvasElements = this.doubleBuffering ? 2 : 1;
 		for (i = 0; i < maxCanvasElements; i++) {
@@ -25,7 +24,8 @@ Viewport.extend({
 			this.canvasElements[i].setAttribute('height', this.height);
 			this.canvasElements[i].setAttribute('style', '');
 			this._toggleVisibility(this.canvasElements[i]);
-			window.document.body.appendChild(this.canvasElements[i]);
+			viewport.appendChild(this.canvasElements[i]);
+
 			this.contexts[i] = this.canvasElements[i].getContext('2d');
 		}
 		this._toggleVisibility(this.canvasElements[this.buffer]);
@@ -33,79 +33,57 @@ Viewport.extend({
 		this.clear();
 		this.swapBuffers();
 	},
-	
-	'register': function Viewport_register(layer, id, actorObject) {
-		this.log('Viewport registration', arguments);
 
-		if (typeof layer === 'undefined') {
-			throw new Error('Layer not defined');
-		} else if (typeof this.consts[layer] === 'undefined') {
-			throw new Error('Layer does not exist!')
+	'register': function Viewport_register(sceneId, sceneObject) {
+		this.log('Viewport scene registration', arguments);
+
+		if (typeof sceneId === 'undefined') {
+			throw new Error('Scene not defined');
 		}
 
-		if (typeof id === 'undefined') {
-			throw new Error('Id not defined');
+		if (typeof sceneObject === 'undefined') {
+			throw new Error('Scene not defined');
 		}
 
-		if (typeof actorObject === 'undefined') {
-			throw new Error('Actor not defined');
-		}
-
-		if (typeof this.drawers[layer] === 'undefined') {
-			this.drawers[layer] = {};
-		}
-
-		if (typeof this.drawers[layer][id] !== 'undefined') {
-			throw new Error('Actor ID already defined for this layer')
-		}
-
-		this.drawers[layer][id] = actorObject;		
+		this.scenes[sceneId] = sceneObject;
 	},
 
-	'unregister': function Viewport_unregister(layer, id) {
-		this.log('Viewport unregistration', arguments);
+	'unregister': function Viewport_unregister(sceneId) {
+		this.log('Viewport scene unregistration', arguments);
 
-		if (typeof layer === 'undefined') {
-			throw new Error('Layer not defined');
-		} else if (typeof this.consts[layer] === 'undefined') {
-			throw new Error('Layer does not exist!')
+		if (typeof sceneId === 'undefined') {
+			throw new Error('Scene not defined');
 		}
 
-		if (typeof id === 'undefined') {
-			throw new Error('Id not defined');
-		}
-
-		if (typeof this.drawers[layer] === 'undefined') {
-			throw new Error('Nothing was registered in this layer')
-		}
-
-		if (typeof this.drawers[layer][id] === 'undefined') {
-			throw new Error('ID was not registered in this layer')
-		}
-
-		delete this.drawers[layer][id];
+		delete this.scenes[sceneId];
 	},
 
 	'draw': function Viewport_draw() {
+		if (typeof this.currentScene === 'undefined') {
+			throw new Error('No scene selected!');
+		}
 		// clear the back buffer
 		this.clear();
 		// draw
-		var layer, id, ctx = this.getContext();
-		for (layer in this.drawers) {
-			if (this.drawers.hasOwnProperty(layer)) {
-				for (id in this.drawers[layer]) {
-					if (this.drawers[layer].hasOwnProperty(id)) {
-						ctx.save();
-						this.drawers[layer][id]._draw(ctx, this.parent.currentTime());
-						ctx.restore();
-					}
-				}
-			}
-		}
+		var ctx = this.getContext();
+        this.scenes[this.currentScene]._draw(ctx);
 
 		// flip buffers
-		this.swapBuffers();	
-	},	
+		this.swapBuffers();
+	},
+
+	'setScene': function Viewport_setScene(sceneId) {
+		this.log('Select scene', sceneId);
+
+		if (typeof this.scenes[sceneId] === 'undefined') {
+			throw new Error('Scene does not exist!');
+		}
+		this.currentScene = sceneId;
+	},
+
+	'getScenes': function Viewport_getScenes() {
+		return this.scenes;
+	},
 
 	'clear': function Viewport_clear() {
 		var ctx = this.getContext();

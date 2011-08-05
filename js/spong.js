@@ -8,30 +8,42 @@ Spong.extend({
         this.log('document loaded!');
         this.frameInterval = 1000 / this.fps;
         this.lastFrameTime = this.currentTime();
+        this.started = false;
 
         if (this.requirementsMet() === true) {
             this.screen.parent = this;
             this.viewport = new Viewport(this.screen);
-            
+            this.scene = new Scene({
+                'viewport': this.viewport,
+                'parent': this
+            });
+
+            this.viewport.register('main', this.scene);
+            this.viewport.setScene('main');
             // for testing
             var sq = new Square({
-                'viewport': this.viewport
-            });             
-            
+                'viewport': this.viewport,
+                'scene': this.scene,
+                'parent': this
+            });
+
             window.addEventListener('keyup', this.start.bind(this), false);
             this.log('press s to start');
         } else {
             alert('Browser does not support canvas! please update')
-        }    
+        }
     },
 
-    'start': function Spong_start (evt) { 
-        var key = event.keyCode || event.which;        
+    'start': function Spong_start (evt) {
+        var key = event.keyCode || event.which;
         if (evt.keyCode === 83) {
-            this.log('started');
-            this.loop();
+            if (this.started === false) {
+                this.loop();
+                this.log('started');
+                this.started = true;
+            }
             window.removeEventListener('keyup', this.start.bind(this), false);
-        } 
+        }
     },
 
     'requirementsMet': function Spong_requirementsMet() {
@@ -48,6 +60,14 @@ Spong.extend({
 
     'loop': function Spong_loop() {
         this.timeoutId = window.setTimeout(this.loop.bind(this), 10);
+        var scenes = this.viewport.getScenes(), i, x, sceneActors = [];
+        for (i in scenes) {
+            sceneActors = scenes[i].getActors();
+            for (x in sceneActors) {
+                sceneActors[x]._tick(this.currentTime());
+            }
+        }
+
         if (this.currentTime() >= (this.lastFrameTime + this.frameInterval)) {
             this.frame();
         }
@@ -56,7 +76,7 @@ Spong.extend({
     'frame': function Spong_frame() {
         //this.log('running at', this.fps, 'fps');
         this.lastFrameTime = this.currentTime();
-        this.viewport.draw();    
+        this.viewport.draw();
     },
 
     'destroy': function Spong_destroy() {
