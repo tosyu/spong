@@ -12,11 +12,26 @@ Spong.extend({
         if (this.requirementsMet() === true) {
             this.screen.parent = this;
             this.viewport = new Viewport(this.screen);
-            // start main loop
-            //this.loop();
+            
+            // for testing
+            var sq = new Square({
+                'viewport': this.viewport
+            });             
+            
+            window.addEventListener('keyup', this.start.bind(this), false);
+            this.log('press s to start');
         } else {
             alert('Browser does not support canvas! please update')
         }    
+    },
+
+    'start': function Spong_start (evt) { 
+        var key = event.keyCode || event.which;        
+        if (evt.keyCode === 83) {
+            this.log('started');
+            this.loop();
+            window.removeEventListener('keyup', this.start.bind(this), false);
+        } 
     },
 
     'requirementsMet': function Spong_requirementsMet() {
@@ -39,9 +54,9 @@ Spong.extend({
     },
 
     'frame': function Spong_frame() {
-        this.lastFrameTime = this.currentTime();
-        this.viewport.draw();
         //this.log('running at', this.fps, 'fps');
+        this.lastFrameTime = this.currentTime();
+        this.viewport.draw();    
     },
 
     'destroy': function Spong_destroy() {
@@ -49,6 +64,7 @@ Spong.extend({
         if (typeof this.timeoutId !== 'undefined') {
             window.clearTimeout(this.timeoutId);
         }
+        window.removeEventListener('keyup', this.start.bind(this), false);
     }
 })
 var sp = new Spong({
@@ -61,4 +77,3 @@ var sp = new Spong({
 });
 document.addEventListener('DOMContentLoaded', sp.ready.bind(sp), false);
 window.addEventListener('unload', sp.destroy.bind(sp), false);
-
