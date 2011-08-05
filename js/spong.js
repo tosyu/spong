@@ -9,8 +9,21 @@ Spong.extend({
         this.frameInterval = 1000 / this.fps;
         this.lastFrameTime = this.currentTime();
 
-        // start main loop
-        this.loop();
+        if (this.requirementsMet() === true) {
+            this.screen.parent = this;
+            this.viewport = new Viewport(this.screen);
+            // start main loop
+            //this.loop();
+        } else {
+            alert('Browser does not support canvas! please update')
+        }    
+    },
+
+    'requirementsMet': function Spong_requirementsMet() {
+        var testCanvas = document.createElement('canvas');
+        var result = typeof testCanvas.getContext == 'function';
+        delete testCanvas;
+        return result;
     },
 
     'currentTime': function Spong_currentTime() {
@@ -27,6 +40,7 @@ Spong.extend({
 
     'frame': function Spong_frame() {
         this.lastFrameTime = this.currentTime();
+        this.viewport.draw();
         //this.log('running at', this.fps, 'fps');
     },
 
@@ -38,7 +52,12 @@ Spong.extend({
     }
 })
 var sp = new Spong({
-    'fps': 25
+    'fps': 25,
+    'screen': {
+        'width': 320,
+        'height': 240,
+        'doubleBuffering': true
+    }
 });
 document.addEventListener('DOMContentLoaded', sp.ready.bind(sp), false);
 window.addEventListener('unload', sp.destroy.bind(sp), false);
