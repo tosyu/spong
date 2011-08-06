@@ -7,7 +7,7 @@ Paddle.extend({
 	'width': 18,
 	'height': 120,
 	'drawable': true,
-	'drawable': true,
+	'collidable': true,
 	'animated': true,
 
 	'draw': function Paddle_draw(context) {

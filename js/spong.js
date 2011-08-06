@@ -9,6 +9,7 @@ Spong.extend({
         this.frameInterval = 1000 / this.fps;
         this.lastFrameTime = this.currentTime();
         this.started = false;
+        this.aa = this.currentTime();
 
         if (this.requirementsMet() === true) {
             this.screen.parent = this;
@@ -70,7 +71,6 @@ Spong.extend({
     },
 
     'loop': function Spong_loop() {
-        this.timeoutId = window.setTimeout(this.loop.bind(this), 10);
         var scenes = this.viewport.getScenes(), i, x, sceneActors = [];
         for (i in scenes) {
             sceneActors = scenes[i].getActors();
@@ -82,6 +82,8 @@ Spong.extend({
         if (this.currentTime() >= (this.lastFrameTime + this.frameInterval)) {
             this.frame();
         }
+
+        this.timeoutId = window.setTimeout(this.loop.bind(this), 10);
     },
 
     'frame': function Spong_frame() {
