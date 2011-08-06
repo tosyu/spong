@@ -47,7 +47,7 @@ Scene.extend({
 
         if (typeof layer === 'undefined') {
             throw new Error('Layer not defined');
-        } else if (typeof this.consts[layer] === 'undefined') {
+        } else if (typeof this.layers[layer] === 'undefined') {
             throw new Error('Layer does not exist!')
         }
 
@@ -76,8 +76,20 @@ Scene.extend({
         }
     },
 
-    'getActors': function Scene_getActors() {
+    'getActors': function Scene_getActors(_layer) {
         var _actors = [], layer, id;
+        if (typeof _layer != 'undefined') {
+            if (typeof this.actors[_layer] !== 'undefined') {
+                for (id in this.actors[_layer]) {
+                    if (this.actors[_layer].hasOwnProperty(id)) {
+                        _actors.push(this.actors[_layer][id]);
+                    }
+                }
+            }
+
+            return _actors;
+        }
+
         for (layer in this.actors) {
             if (this.actors.hasOwnProperty(layer)) {
                 for (id in this.actors[layer]) {
@@ -88,6 +100,28 @@ Scene.extend({
             }
         }
         return _actors;
+    },
+
+    'getActor': function Scene_getActor(layer, id) {
+        if (typeof layer === 'undefined') {
+            throw new Error('Layer not defined');
+        } else if (typeof this.layers[layer] === 'undefined') {
+            throw new Error('Layer does not exist!')
+        }
+
+        if (typeof id === 'undefined') {
+            throw new Error('Id not defined');
+        }
+
+        if (typeof this.actors[layer] === 'undefined') {
+            return false;
+        }
+
+        if (typeof this.actors[layer][id] === 'undefined') {
+            return false;
+        }
+
+        return this.actors[layer][id];
     }
 
 });

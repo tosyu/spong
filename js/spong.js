@@ -20,8 +20,19 @@ Spong.extend({
 
             this.viewport.register('main', this.scene);
             this.viewport.setScene('main');
+
             // for testing
             var sq = new Square({
+                'viewport': this.viewport,
+                'scene': this.scene,
+                'parent': this
+            });
+            var paddleAI = new PaddleAi({
+                'viewport': this.viewport,
+                'scene': this.scene,
+                'parent': this
+            });
+            var paddleUser = new PaddleUser({
                 'viewport': this.viewport,
                 'scene': this.scene,
                 'parent': this

@@ -8,7 +8,7 @@ Actor.extend({
 	'height': 0,
 	'collidable': false,
 	'drawable': false,
-	'animated': true,
+	'animated': false,
 	'_draw': function Actor__draw(context) {
 		if (this.drawable === true) {
 			this.draw(context);
@@ -27,6 +27,19 @@ Actor.extend({
 		if (this.collidable === true) {
 			this.collisionDetect();
 		}
+	},
+
+	'isCollidable': function Actor_isCollidable() {
+		return this.collidable;
+	},
+
+	'getCoordinates': function Actor_getCoords() {
+		// basic, square coords, overwrite this func in the extending
+		// actor object if you wan't something more complicated
+		return [{'x': this.x, 'y': this.y },
+				{'x': this.x + this.width, 'y': this.y },
+				{'x': this.x, 'y': this.y + this.height },
+				{'x': this.x + this.width, 'y': this.y + this.height }];
 	}
 
 });
