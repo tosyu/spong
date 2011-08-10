@@ -29,19 +29,19 @@ Square.extend({
 		context.fillRect(0, 0, this.width, this.height);
 	},
 
-	'collisionWith': function Square_collisionWith(side, withActor) {
+	'edgeCollisionWith': function Square_collisionWith(side, withActor) {
 		switch (side) {
 			case 0:
-				this.velocity.y = 1;
+				if (typeof withActor === 'undefined') this.velocity.y = 3;
 			break;
 			case 1:
-				this.velocity.x = -1;
+				if (typeof withActor === 'undefined' || withActor.getId() !== 'paddleUser') this.velocity.x = -3;
 			break;
 			case 2:
-				this.velocity.y = -1;
+				if (typeof withActor === 'undefined') this.velocity.y = -3;
 			break;
 			case 3:
-				this.velocity.x = 1;
+				if (typeof withActor === 'undefined' || withActor.getId() !== 'paddleAi') this.velocity.x = 3;
 			break;
 			default:
 				this.log('lol, this side does not exist!');

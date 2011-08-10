@@ -82,6 +82,7 @@ Spong.extend({
             this.frame();
         }
 
+        //if (this.currentTime() - this.aa <= 2000)
         this.timeoutId = window.setTimeout(this.loop.bind(this), 10);
     },
 
@@ -100,7 +101,7 @@ Spong.extend({
     }
 })
 var sp = new Spong({
-    'fps': 60,
+    'fps': 30,
     'screen': {
         'width': 320,
         'height': 240,

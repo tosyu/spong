@@ -4,10 +4,12 @@ Actor.extend({
 	'id': 'actor',
 	'x': 0,
 	'y': 0,
+	'rotation': 0,
 	'width': 0,
 	'height': 0,
 	'collidable': false,
 	'collider': true,
+	'collidesWithScreen': true,
 	'drawable': false,
 	'animated': false,
 
@@ -42,12 +44,24 @@ Actor.extend({
 		}
 	},
 
+	'getRotation': function Actor_getRotation() {
+		return this.rotation;
+	},
+
+	'setRotation': function Actor_setRotation(rotation) {
+		this.rotation = isNan(parseInt(rotation)) === false ? parseInt(rotation) : 0;
+	},
+
 	'isCollidable': function Actor_isCollidable() {
 		return this.collidable;
 	},
 
 	'isCollider': function Actor_isCollider() {
 		return this.collider;
+	},
+
+	'isCollidingWithScreen': function Actor_isCollidingWithScreen() {
+		return this.collidesWithScreen;
 	},
 
 	'getBoundingBox': function Actor_getBoundingBox() { // in most cases its the same as getCoordinates
