@@ -71,13 +71,12 @@ Spong.extend({
     },
 
     'loop': function Spong_loop() {
-        var scenes = this.viewport.getScenes(), i, x, sceneActors = [];
-        for (i in scenes) {
-            sceneActors = scenes[i].getActors();
-            for (x in sceneActors) {
-                sceneActors[x]._tick(this.currentTime());
-            }
+        var scene = this.viewport.getCurrentScene(), i, sceneActors = [];
+        sceneActors = scene.getActors();
+        for (i in sceneActors) {
+            sceneActors[i]._tick(this.currentTime());
         }
+        scene.getCollisions().tick();
 
         if (this.currentTime() >= (this.lastFrameTime + this.frameInterval)) {
             this.frame();
@@ -101,7 +100,7 @@ Spong.extend({
     }
 })
 var sp = new Spong({
-    'fps': 25,
+    'fps': 60,
     'screen': {
         'width': 320,
         'height': 240,

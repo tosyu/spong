@@ -85,6 +85,10 @@ Viewport.extend({
 		return this.scenes;
 	},
 
+	'getCurrentScene': function Viewport_getCurrentScene() {
+		return this.scenes[this.currentScene];
+	},
+
 	'clear': function Viewport_clear() {
 		var ctx = this.getContext();
 		ctx.save();

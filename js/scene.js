@@ -12,6 +12,9 @@ Scene.extend({
     'ready': function Scene_ready() {
         this.actors = {};
         this.layers = [0, 1, 2, 3, 4];
+        this.collisions = new Collisions({
+            'scene': this
+        });
     },
 
     'register': function Scene_register(layer, id, actorObject) {
@@ -40,6 +43,10 @@ Scene.extend({
         }
 
         this.actors[layer][id] = actorObject;
+
+        if (actorObject.isCollidable()) {
+            this.collisions.register(actorObject);
+        }
     },
 
     'unregister': function Scene_unregister(layer, id) {
@@ -63,7 +70,13 @@ Scene.extend({
             throw new Error('ID was not registered in this layer')
         }
 
+        this.collisions.unregister(this.actors[layer][id]);
+
         delete this.actors[layer][id];
+    },
+
+    'getCollisions': function Scene_getCollisions() {
+        return this.collisions;
     },
 
     '_draw': function Scene__draw(context) {
