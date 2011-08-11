@@ -4,34 +4,34 @@ Viewport.extend({
 
 	'run': function Viewport_run() {
 		this.log('screen size is ', this.width, 'x', this.height);
-		this.buffer = 0;
 		this.scenes = {};
 		this.currentScene = undefined;
 
-		this.canvasElements = [];
-		this.contexts = [];
+		this.canvasElement = null;
+		this.context = null;
+		this.backBuffer = null;
 
 		var viewport = document.createElement('div');
 		viewport.setAttribute('id', 'viewport');
 		viewport.setAttribute('style', ['position:relative;padding:0;margin:0;width:', this.width, 'px;height:', this.height, 'px;'].join(''));
 		document.body.appendChild(viewport);
 
-		var i, maxCanvasElements = this.doubleBuffering ? 2 : 1;
-		for (i = 0; i < maxCanvasElements; i++) {
-			this.canvasElements[i] = document.createElement('canvas');
-			this.canvasElements[i].setAttribute('id', ['buffer', i].join(''));
-			this.canvasElements[i].setAttribute('width', this.width);
-			this.canvasElements[i].setAttribute('height', this.height);
-			this.canvasElements[i].setAttribute('style', '');
-			this._toggleVisibility(this.canvasElements[i]);
-			viewport.appendChild(this.canvasElements[i]);
+		this.canvasElement = document.createElement('canvas');
+		this.canvasElement.setAttribute('viewport_canvas');
+		this.canvasElement.setAttribute('width', this.width);
+		this.canvasElement.setAttribute('height', this.height);
+		this.canvasElement.setAttribute('style', 'display:block;position:absolute;top:0;left:0;visibility:visible;background-color:#000;');
+		viewport.appendChild(this.canvasElement);
 
-			this.contexts[i] = this.canvasElements[i].getContext('2d');
+		this.context = this.canvasElement.getContext('2d');
+		if (this.doubleBuffering === true) {
+			var backBufferCanvas = document.createElement('canvas');
+			backBufferCanvas.width = this.canvasElement.width;
+			backBufferCanvas.height = this.canvasElement.height;
+			this.backBuffer = backBufferCanvas.getContext('2d');
 		}
-		this._toggleVisibility(this.canvasElements[this.buffer]);
 
 		this.clear();
-		this.swapBuffers();
 	},
 
 	'register': function Viewport_register(sceneId, sceneObject) {
@@ -98,9 +98,8 @@ Viewport.extend({
 
 	'swapBuffers': function Viewport_swapBuffers() {
 		if (this.doubleBuffering) {
-			this._toggleVisibility(this.canvasElements[this.buffer]);
-			this._toggleVisibility(this.canvasElements[this._getBufferID()]);
-			this.buffer = this._getBufferID();
+			this.context.clearRect(0, 0, this.context.canvas.width, this.context.canvas.height);
+			this.context.drawImage(this.getContext().canvas, 0, 0);
 		}
 	},
 
@@ -112,20 +111,11 @@ Viewport.extend({
 		}
 	},
 
-	'getContext': function Viewport_getBuffer() {
-		return this.contexts[this._getBufferID()];
-	},
-
-	//gets the next buffer ID
-	'_getBufferID': function Viewport_getBuffer() {
-		return this.buffer == 0 && this.doubleBuffering ? this.buffer + 1 : 0;
-	},
-
-	'_toggleVisibility': function Viewport__toggleVisibility(element) {
-		if (element.getAttribute('style').indexOf('hidden') !== -1) {
-			element.setAttribute('style', 'display:block;position:absolute;top:0;left:0;visibility:visible;background-color:#000;');
+	'getContext': function Viewport_geContext() {
+		if (this.doubleBuffering === true) {
+			return this.backBuffer;
 		} else {
-			element.setAttribute('style', 'display:block;position:absolute;top:0;left:0;visibility:hidden;background-color:#000;');
+			return this.context;
 		}
 	}
 });
