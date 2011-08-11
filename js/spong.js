@@ -82,7 +82,6 @@ Spong.extend({
             this.frame();
         }
 
-        //if (this.currentTime() - this.aa <= 2000)
         this.timeoutId = window.setTimeout(this.loop.bind(this), 10);
     },
 

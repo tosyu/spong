@@ -32,16 +32,16 @@ Square.extend({
 	'edgeCollisionWith': function Square_collisionWith(side, withActor) {
 		switch (side) {
 			case 0:
-				if (typeof withActor === 'undefined') this.velocity.y = 3;
+				this.velocity.y = 3;
 			break;
 			case 1:
-				if (typeof withActor === 'undefined' || withActor.getId() !== 'paddleUser') this.velocity.x = -3;
+				this.velocity.x = -3;
 			break;
 			case 2:
-				if (typeof withActor === 'undefined') this.velocity.y = -3;
+				this.velocity.y = -3;
 			break;
 			case 3:
-				if (typeof withActor === 'undefined' || withActor.getId() !== 'paddleAi') this.velocity.x = 3;
+				this.velocity.x = 3;
 			break;
 			default:
 				this.log('lol, this side does not exist!');

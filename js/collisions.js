@@ -25,22 +25,23 @@ Collisions.extend({
     },
 
     'tick': function Collisions_tick() {
-        var i, x, a, boundingBox, actorEdges, colliderEdges, corner, edgeBoundingBox, edgeCorner, colliderBoundingBox;
+        var i, x, a, boundingBox, actorEdges, colliderEdges, corner, edgeBoundingBox, edgeCorner, colliderBoundingBox, edgeCornerBBoxes;
         for (i in this.colliders) {
             if (this.colliders.hasOwnProperty(i)) {
                 colliderEdges = this.edgesRotate(this.colliders[i].getEdges(), this.colliders[i].getRotation());
                 colliderBoundingBox = this.colliders[i].getBoundingBox();
                 for (x in this.actors) {
-                    if (this.actors.hasOwnProperty(x)) {
-                        if (this.actors[x].getId() == this.colliders[i].getId()) {
-                            continue;
-                        }
+                    if (this.actors.hasOwnProperty(x) && this.actors[x].getId() !== this.colliders[i].getId()) {
                         if ((corner = this.boxOverlapsWith(colliderBoundingBox, this.actors[x].getBoundingBox())) !== false) {
                             for (a in colliderEdges) {
                                 edgeBoundingBox = this.getBoundingBoxFromEdge(colliderEdges[a]);
-                                if ((edgeCorner = this.boxOverlapsWith(edgeBoundingBox, this.actors[x].getBoundingBox())) !== true) {
-                                    this.colliders[i].edgeCollisionWith(parseInt(a), this.actors[x]);
-                                    this.actors[x].pointCollisionWith(edgeBoundingBox[corner], this.colliders[i]);
+                                if ((edgeCorner = this.boxOverlapsWith(edgeBoundingBox, this.actors[x].getBoundingBox())) !== false) {
+                                    edgeCornerBBoxes = this.getBoundingBoxFromEdgeCorners(colliderEdges[a]);
+                                    if (this.boxOverlapsWith(edgeCornerBBoxes['box1'], this.actors[x].getBoundingBox()) !== false
+                                     && this.boxOverlapsWith(edgeCornerBBoxes['box2'], this.actors[x].getBoundingBox()) !== false) {
+                                        this.colliders[i].edgeCollisionWith(parseInt(a), this.actors[x]);
+                                        this.actors[x].pointCollisionWith(edgeBoundingBox[corner], this.colliders[i]);
+                                    }
                                 }
                             }
                             this.colliders[i].cornerCollisionWith(corner, this.actors[x]);
@@ -82,21 +83,49 @@ Collisions.extend({
     },
 
     'edgesRotate': function Collisions_edgesTransform(edges, rotation) {
-        var radius = Math.max(edges[1]['x'], edges[1]['x']) - Math.min(edges[0]['x'], edges[0]['x']), i;
+        var radius = Math.max(edges[0]['p2']['x'], edges[1]['p1']['x']) - Math.min(edges[0]['p2']['x'], edges[1]['p1']['x']), i,
+        xOffset = edges[0]['p1']['x'], yOffset = edges[0]['p1']['y'];
         for (i in edges) {
-            edges[i][0]['x'] = parseInt(Math.cos(rotation) * radius);
-            edges[i][0]['y'] = parseInt(Math.sin(rotation) * radius);
-            edges[i][1]['x'] = parseInt(Math.cos(rotation) * radius);
-            edges[i][1]['y'] = parseInt(Math.sin(rotation) * radius);
+            // origin of rotation should bee 0,0 of the object nt grid
+            edges[i]['p1']['x'] -= xOffset;
+            edges[i]['p1']['y'] -= yOffset;
+            edges[i]['p2']['x'] -= xOffset;
+            edges[i]['p2']['y'] -= yOffset;
+
+            // rotate
+            edges[i]['p1']['x'] = parseInt(Math.cos(radius) * edges[i]['p1']['x'] - Math.sin(radius) * edges[i]['p1']['y']);
+            edges[i]['p1']['y'] = parseInt(Math.sin(radius) * edges[i]['p1']['x'] + Math.cos(radius) * edges[i]['p1']['y']);
+            edges[i]['p2']['x'] = parseInt(Math.cos(radius) * edges[i]['p2']['x'] - Math.sin(radius) * edges[i]['p2']['y']);
+            edges[i]['p2']['y'] = parseInt(Math.sin(radius) * edges[i]['p2']['x'] + Math.cos(radius) * edges[i]['p2']['y']);
+
+            // end add offset back
+            edges[i]['p1']['x'] += xOffset;
+            edges[i]['p1']['y'] += yOffset;
+            edges[i]['p2']['x'] += xOffset;
+            edges[i]['p2']['y'] += yOffset;
         }
         return edges;
     },
 
+    'getBoundingBoxFromEdgeCorners': function Collisions_getBoundingBoxFromEdgeCorners(edge) {
+        var a = Math.max(edge['p1']['x'], edge['p2']['x']) - Math.min(edge['p1']['x'], edge['p2']['x']),
+            b = Math.max(edge['p1']['y'], edge['p2']['y']) - Math.min(edge['p1']['y'], edge['p2']['y']),
+            modifier = a > b ? parseInt(a/2) : parseInt(b/2);
+        return {'box1': [{'x': edge['p1']['x'] - modifier, 'y': edge['p1']['y'] - modifier},
+                         {'x': edge['p1']['x'] + modifier, 'y': edge['p1']['y'] - modifier},
+                         {'x': edge['p1']['x'] + modifier, 'y': edge['p1']['y'] + modifier},
+                         {'x': edge['p1']['x'] - modifier, 'y': edge['p1']['y'] + modifier}],
+                'box2': [{'x': edge['p2']['x'] - modifier, 'y': edge['p2']['y'] - modifier},
+                         {'x': edge['p2']['x'] + modifier, 'y': edge['p2']['y'] - modifier},
+                         {'x': edge['p2']['x'] + modifier, 'y': edge['p2']['y'] + modifier},
+                         {'x': edge['p2']['x'] - modifier, 'y': edge['p2']['y'] + modifier}]};
+    },
+
     'getBoundingBoxFromEdge': function Collisions_getBoundingBoxFromEdge(edge) { //@TODO
-        var sideHalf = parseInt(Math.abs(Math.sqrt(Math.pow((edge[0]['x'] - edge[1]['x']), 2) + Math.pow((edge[0]['y'] - edge[0]['y']), 2))) / 2);
-        return [{'x': edge[0]['x'] - sideHalf, 'y': edge[0]['y'] - sideHalf},
-                {'x': edge[0]['x'] + sideHalf, 'y': edge[0]['y'] - sideHalf},
-                {'x': edge[1]['x'] + sideHalf, 'y': edge[1]['y'] + sideHalf},
-                {'x': edge[1]['x'] - sideHalf, 'y': edge[1]['y'] + sideHalf}];
+        var modifier = parseInt(Math.sqrt(Math.pow((edge['p2']['x'] - edge['p1']['x']), 2) + Math.pow((edge['p2']['y'] - edge['p1']['y']), 2)) / 3);
+        return [{'x': edge['p1']['x'] - modifier, 'y': edge['p1']['y'] - modifier},
+                {'x': edge['p1']['x'] + modifier, 'y': edge['p1']['y'] - modifier},
+                {'x': edge['p2']['x'] + modifier, 'y': edge['p2']['y'] + modifier},
+                {'x': edge['p2']['x'] - modifier, 'y': edge['p2']['y'] + modifier}];
     }
 })

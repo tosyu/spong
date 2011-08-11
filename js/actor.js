@@ -67,23 +67,24 @@ Actor.extend({
 	'getBoundingBox': function Actor_getBoundingBox() { // in most cases its the same as getCoordinates
 		return [{'x': this.x, 'y': this.y },
 			    {'x': this.x + this.width, 'y': this.y },
-			    {'x': this.x, 'y': this.y + this.height },
-			    {'x': this.x + this.width, 'y': this.y + this.height }];
+			    {'x': this.x + this.width, 'y': this.y + this.height },
+			    {'x': this.x, 'y': this.y + this.height }];
 	},
 
 	'getCoordinates': function Actor_getCoords() {
 		// basic, square coords, overwrite this func in the extending
 		// actor object if you wan't something more complicated
 		return [{'x': this.x, 'y': this.y },
-				{'x': this.x + this.width, 'y': this.y },
-				{'x': this.x, 'y': this.y + this.height },
-				{'x': this.x + this.width, 'y': this.y + this.height }];
+			    {'x': this.x + this.width, 'y': this.y },
+			    {'x': this.x + this.width, 'y': this.y + this.height },
+			    {'x': this.x, 'y': this.y + this.height }];
 	},
 
 	'getEdges': function Actor_getEdges() {
-		var coords = this.getCoordinates(), i, edges = [];
-		for (i = 0; i < coords.length; i++) {
-			edges.push([coords[i], coords[ i >= coords.length - 1 ? 0 : i + 1]]);
+		var i, edges = [], coords = this.getCoordinates(), imax = coords.length, iNext;
+		for (i = 0; i < imax; i++) {
+			iNext = i >= imax - 1 ? 0 : i + 1;
+			edges.push({'p1':coords[i], 'p2':coords[iNext]});
 		}
 		return edges;
 	}
