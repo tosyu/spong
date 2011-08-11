@@ -82,7 +82,10 @@ Collisions.extend({
         return false;
     },
 
-    'edgesRotate': function Collisions_edgesTransform(edges, rotation) {
+    'edgesRotate': function Collisions_edgesRotate(edges, rotation) {
+        if (rotation === 0) {
+            return edges;
+        }
         var radius = Math.max(edges[0]['p2']['x'], edges[1]['p1']['x']) - Math.min(edges[0]['p2']['x'], edges[1]['p1']['x']), i,
         xOffset = edges[0]['p1']['x'], yOffset = edges[0]['p1']['y'];
         for (i in edges) {
